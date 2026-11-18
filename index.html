@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belanjaku — Marketplace</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#">belanja<span>ku</span></a>
+  <div class="search"><input id="searchInput" placeholder="Cari produk, merek, dan toko..."><button onclick="searchProducts()">Cari</button></div>
+  <nav><button class="plain" onclick="showPage('home')">Beranda</button><button class="plain" onclick="showPage('seller')">Jual</button><button class="cart-btn" onclick="showPage('cart')">🛒 <span id="cartCount">0</span></button><button id="authBtn" onclick="openAuth()">Masuk</button></nav>
+</header>
+<main>
+  <section id="homePage">
+    <section class="hero">
+      <div><p class="eyebrow">BELANJA LEBIH MUDAH</p><h1>Temukan yang kamu<br><span>butuhkan hari ini.</span></h1><p>Produk pilihan, harga bersahabat, pengalaman belanja nyaman.</p><button class="primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Mulai belanja</button></div>
+      <div class="hero-art"><div class="bubble">PROMO<br><b>HEMAT!</b></div><div class="bag">🛍️</div><div class="spark">✦</div></div>
+    </section>
+    <section class="categories"><h2>Kategori pilihan</h2><div class="category-grid">
+      <button onclick="filterCategory('Elektronik')">📱<span>Elektronik</span></button><button onclick="filterCategory('Fashion')">👕<span>Fashion</span></button><button onclick="filterCategory('Rumah')">🏠<span>Rumah</span></button><button onclick="filterCategory('Kecantikan')">🧴<span>Kecantikan</span></button><button onclick="filterCategory('Olahraga')">⚽<span>Olahraga</span></button><button onclick="filterCategory('')">✨<span>Semua</span></button>
+    </div></section>
+    <section id="products" class="products-section"><div class="section-head"><div><p class="eyebrow">PILIHAN UNTUKMU</p><h2>Produk rekomendasi</h2></div><select id="sortSelect" onchange="renderProducts()"><option value="default">Urutkan</option><option value="low">Harga terendah</option><option value="high">Harga tertinggi</option></select></div><div id="productGrid" class="product-grid"></div></section>
+  </section>
+  <section id="cartPage" class="page hidden"><h1>Keranjang belanja</h1><div id="cartItems"></div><aside class="summary" id="cartSummary"></aside></section>
+  <section id="sellerPage" class="page hidden"><h1>Mulai jualan di Belanjaku</h1><p class="muted">Tambahkan produk demo. Data tersimpan di browser perangkat ini.</p><form id="productForm" class="seller-form">
+    <label>Nama produk<input id="pName" required placeholder="Contoh: Headphone Wireless"></label><label>Kategori<select id="pCategory"><option>Elektronik</option><option>Fashion</option><option>Rumah</option><option>Kecantikan</option><option>Olahraga</option></select></label><label>Harga (Rp)<input id="pPrice" type="number" min="1" required placeholder="150000"></label><label>Emoji/gambar sederhana<input id="pEmoji" maxlength="4" placeholder="🎧" value="📦"></label><label>Deskripsi<textarea id="pDesc" placeholder="Jelaskan produkmu..."></textarea></label><button class="primary">Terbitkan produk</button>
+  </form></section>
+  <section id="authPage" class="page hidden"><div class="auth-card"><h1>Selamat datang!</h1><p class="muted">Masuk demo menggunakan nama kamu.</p><form id="authForm"><label>Nama<input id="userName" required placeholder="Nama kamu"></label><button class="primary">Masuk</button></form></div></section>
+</main>
+<footer><div class="brand">belanja<span>ku</span></div><p>Marketplace demo • Belanja nyaman, setiap hari.</p><small>© 2026 Belanjaku. Dibuat sebagai starter project.</small></footer>
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body></html>

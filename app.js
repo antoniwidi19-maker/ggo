@@ -1,0 +1,33 @@
+const starterProducts=[
+{id:1,name:"Headphone Wireless Premium",category:"Elektronik",price:189000,emoji:"🎧",desc:"Headphone nyaman dengan suara jernih.",sold:128},
+{id:2,name:"Sneakers Daily Classic",category:"Fashion",price:249000,emoji:"👟",desc:"Sepatu kasual untuk aktivitas harian.",sold:94},
+{id:3,name:"Botol Minum Insulated",category:"Rumah",price:79000,emoji:"🥤",desc:"Menjaga minuman tetap segar lebih lama.",sold:210},
+{id:4,name:"Skincare Daily Set",category:"Kecantikan",price:135000,emoji:"🧴",desc:"Paket perawatan kulit harian.",sold:76},
+{id:5,name:"Tas Selempang Minimalis",category:"Fashion",price:99000,emoji:"👜",desc:"Tas simpel untuk bepergian.",sold:153},
+{id:6,name:"Lampu Meja LED",category:"Rumah",price:115000,emoji:"💡",desc:"Lampu meja dengan desain modern.",sold:62},
+{id:7,name:"Smartwatch Sport",category:"Elektronik",price:325000,emoji:"⌚",desc:"Jam pintar untuk menemani aktivitas.",sold:48},
+{id:8,name:"Bola Futsal Training",category:"Olahraga",price:145000,emoji:"⚽",desc:"Bola untuk latihan dan bermain.",sold:39}
+];
+let products=JSON.parse(localStorage.getItem("belanjaku_products")||"null")||starterProducts;
+let cart=JSON.parse(localStorage.getItem("belanjaku_cart")||"[]");
+let currentUser=localStorage.getItem("belanjaku_user")||"";
+let activeCategory="";
+const rupiah=n=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n);
+function persist(){localStorage.setItem("belanjaku_products",JSON.stringify(products));localStorage.setItem("belanjaku_cart",JSON.stringify(cart));}
+function renderProducts(){let list=products.filter(p=>(!activeCategory||p.category===activeCategory));const q=(document.getElementById("searchInput")?.value||"").toLowerCase();if(q)list=list.filter(p=>(p.name+" "+p.category).toLowerCase().includes(q));let sort=document.getElementById("sortSelect")?.value;if(sort==="low")list.sort((a,b)=>a.price-b.price);if(sort==="high")list.sort((a,b)=>b.price-a.price);document.getElementById("productGrid").innerHTML=list.length?list.map(p=>`<article class="product-card"><div class="product-image">${escapeHtml(p.emoji||"📦")}</div><div class="product-info"><h3>${escapeHtml(p.name)}</h3><div class="price">${rupiah(p.price)}</div><div class="meta">⭐ 4,8 · ${p.sold||0} terjual · ${escapeHtml(p.category)}</div><button onclick="addToCart(${p.id})">+ Keranjang</button></div></article>`).join(""):'<p class="muted">Produk tidak ditemukan.</p>'}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function searchProducts(){activeCategory="";renderProducts();document.getElementById("products").scrollIntoView({behavior:"smooth"});}
+function filterCategory(c){activeCategory=c;renderProducts();document.getElementById("products").scrollIntoView({behavior:"smooth"});}
+function addToCart(id){let item=cart.find(x=>x.id===id);if(item)item.qty++;else cart.push({id,qty:1});persist();updateCartCount();toast("Produk ditambahkan ke keranjang");}
+function updateCartCount(){document.getElementById("cartCount").textContent=cart.reduce((a,b)=>a+b.qty,0);}
+function showPage(page){["homePage","cartPage","sellerPage","authPage"].forEach(id=>document.getElementById(id).classList.add("hidden"));if(page==="home")document.getElementById("homePage").classList.remove("hidden");if(page==="cart"){document.getElementById("cartPage").classList.remove("hidden");renderCart()}if(page==="seller")document.getElementById("sellerPage").classList.remove("hidden");if(page==="auth")document.getElementById("authPage").classList.remove("hidden");window.scrollTo(0,0)}
+function renderCart(){let root=document.getElementById("cartItems");if(!cart.length){root.innerHTML='<p class="muted">Keranjang kamu masih kosong. Yuk cari produk!</p>';document.getElementById("cartSummary").innerHTML="";return}let total=0;root.innerHTML=cart.map(item=>{let p=products.find(x=>x.id===item.id);if(!p)return"";total+=p.price*item.qty;return `<div class="cart-row"><div class="cart-emoji">${escapeHtml(p.emoji)}</div><div class="grow"><b>${escapeHtml(p.name)}</b><div class="price">${rupiah(p.price)}</div><small class="muted">Jumlah: ${item.qty}</small></div><button onclick="changeQty(${p.id},-1)">−</button><button onclick="changeQty(${p.id},1)">+</button><button onclick="removeCart(${p.id})">Hapus</button></div>`}).join("");document.getElementById("cartSummary").innerHTML=`<h3>Ringkasan belanja</h3><p>Total produk <b style="float:right">${cart.reduce((a,b)=>a+b.qty,0)}</b></p><p>Total pembayaran</p><strong>${rupiah(total)}</strong><p><small class="muted">Biaya pengiriman dihitung pada tahap checkout.</small></p><button class="primary" style="width:100%" onclick="checkout()">Lanjut checkout</button>`}
+function changeQty(id,d){let x=cart.find(i=>i.id===id);if(x)x.qty+=d;if(x&&x.qty<=0)cart=cart.filter(i=>i.id!==id);persist();updateCartCount();renderCart()}
+function removeCart(id){cart=cart.filter(i=>i.id!==id);persist();updateCartCount();renderCart()}
+function checkout(){if(!currentUser){toast("Silakan masuk terlebih dahulu");showPage("auth");return}toast("Checkout demo: integrasikan payment gateway untuk pembayaran nyata.");}
+function openAuth(){showPage("auth")}
+document.getElementById("authForm").addEventListener("submit",e=>{e.preventDefault();currentUser=document.getElementById("userName").value.trim();localStorage.setItem("belanjaku_user",currentUser);updateAuth();toast("Berhasil masuk sebagai "+currentUser);showPage("home")});
+function updateAuth(){document.getElementById("authBtn").textContent=currentUser?currentUser+" · Keluar":"Masuk";document.getElementById("authBtn").onclick=()=>{if(currentUser){currentUser="";localStorage.removeItem("belanjaku_user");updateAuth();toast("Kamu telah keluar")}else openAuth()}}
+document.getElementById("productForm").addEventListener("submit",e=>{e.preventDefault();if(!currentUser){toast("Masuk terlebih dahulu untuk mulai jualan");showPage("auth");return}products.unshift({id:Date.now(),name:document.getElementById("pName").value.trim(),category:document.getElementById("pCategory").value,price:Number(document.getElementById("pPrice").value),emoji:document.getElementById("pEmoji").value||"📦",desc:document.getElementById("pDesc").value,sold:0});persist();e.target.reset();document.getElementById("pEmoji").value="📦";renderProducts();toast("Produk berhasil diterbitkan");showPage("home")});
+function toast(msg){let t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove("show"),2400)}
+renderProducts();updateCartCount();updateAuth();
